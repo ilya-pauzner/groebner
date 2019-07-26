@@ -5,20 +5,29 @@
 #include <iostream>
 
 namespace Groebner {
-    using IntegerVector = std::vector<int>;
-    class Monomial : public IntegerVector {
-        using IntegerVector::IntegerVector;
+    using DegreeType = size_t;
+    using IntegerVector = std::vector<DegreeType>;
+    class Monomial {
      public:
-        Monomial& operator*=(const Monomial& other);
-        Monomial operator*(const Monomial& other) const;
+        Monomial() = default;
+        Monomial(const Monomial&) = default;
+        Monomial(Monomial&&) = default;
+        Monomial(std::initializer_list<size_t> ilist);
 
-        bool DivisibleBy(const Monomial& other) const;
+        Monomial& operator*=(const Monomial& other);
+        friend Monomial operator*(const Monomial&, const Monomial&);
+
+        bool isDivisibleBy(const Monomial &other) const;
         Monomial&operator/=(const Monomial& other);
-        Monomial operator/(const Monomial& other) const;
+        friend Monomial operator/(const Monomial&, const Monomial&);
+
+        friend bool operator==(const Monomial&, const Monomial&);
+        friend bool operator!=(const Monomial&, const Monomial&);
 
         friend std::ostream& operator<<(std::ostream &os, const Monomial& m);
      private:
-        void Trim();
+        IntegerVector Degrees_;
+        void trimTrailingZeroes();
     };
 }
 

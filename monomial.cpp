@@ -1,65 +1,78 @@
-#include <assert.h>
 #include "monomial.h"
 
 namespace Groebner {
-    Monomial& Monomial::operator*=(const Monomial& other) {
-        (*this).resize(std::max((*this).size(), other.size()));
-        for (size_t variableIndex = 0; variableIndex < other.size(); ++variableIndex) {
-            (*this)[variableIndex] += other[variableIndex];
+    Monomial::Monomial(std::initializer_list<size_t> ilist) : Degrees_(ilist) {
+        trimTrailingZeroes();
+        for (auto variableDegree : Degrees_) {
+            if (variableDegree < 0) {
+                throw std::runtime_error("Negative powers are not allowed.");
+            }
+        }
+    }
 
+    Monomial& Monomial::operator*=(const Monomial& other) {
+        Degrees_.resize(std::max(Degrees_.size(), other.Degrees_.size()));
+        for (size_t variableIndex = 0; variableIndex < other.Degrees_.size(); ++variableIndex) {
+            Degrees_[variableIndex] += other.Degrees_[variableIndex];
         }
         return *this;
     }
 
-    Monomial Monomial::operator*(const Monomial& other) const {
-        Monomial ret(*this);
-        ret *= other;
+    Monomial operator*(const Monomial& lhs, const Monomial& rhs) {
+        Monomial ret(lhs);
+        ret *= rhs;
         return ret;
     }
 
-    bool Monomial::DivisibleBy(const Monomial& other) const {
-        for (size_t variableIndex = 0; variableIndex < (*this).size() && variableIndex < other.size(); ++variableIndex) {
-            if (other[variableIndex] > (*this)[variableIndex]) {
-                return false;
-            }
-        }
-        // checking tail is zero
-        for (size_t variableIndex = (*this).size(); variableIndex < other.size(); ++variableIndex) {
-            if (other[variableIndex] > 0) {
+    bool Monomial::isDivisibleBy(const Monomial &other) const {
+        for (size_t variableIndex = 0; variableIndex < Degrees_.size() && variableIndex < other.Degrees_.size(); ++variableIndex) {
+            if (other.Degrees_[variableIndex] > Degrees_[variableIndex]) {
                 return false;
             }
         }
 
-        return true;
+        return (Degrees_.size() >= other.Degrees_.size());
     }
 
     Monomial& Monomial::operator/=(const Monomial& other) {
-        (*this).resize(std::max((*this).size(), other.size()));
-        for (size_t variableIndex = 0; variableIndex < other.size(); ++variableIndex) {
-            (*this)[variableIndex] -= other[variableIndex];
-            assert((*this)[variableIndex] >= 0);
+        Degrees_.resize(std::max(Degrees_.size(), other.Degrees_.size()));
+        for (size_t variableIndex = 0; variableIndex < other.Degrees_.size(); ++variableIndex) {
+            if (Degrees_[variableIndex] < other.Degrees_[variableIndex]) {
+                throw std::runtime_error("Not divisible.");
+            }
+            Degrees_[variableIndex] -= other.Degrees_[variableIndex];
         }
-        (*this).Trim();
+        this->trimTrailingZeroes();
         return *this;
     }
 
-    Monomial Monomial::operator/(const Monomial& other) const {
-        Monomial ret(*this);
-        ret /= other;
+    Monomial operator/(const Monomial& lhs, const Monomial& rhs) {
+        Monomial ret(lhs);
+        ret /= rhs;
         return ret;
     }
 
-    void Monomial::Trim() {
-        while (!(*this).empty() && !(*this).back()) {
-            (*this).pop_back();
+    bool operator==(const Monomial& lhs, const Monomial& rhs) {
+        return lhs.Degrees_ == rhs.Degrees_;
+    }
+
+    bool operator!=(const Monomial& lhs, const Monomial& rhs) {
+        return lhs.Degrees_ != rhs.Degrees_;
+    }
+
+    void Monomial::trimTrailingZeroes() {
+        int nonZeroIndex = int(Degrees_.size()) - 1;
+        while (nonZeroIndex > -1 && Degrees_[nonZeroIndex] == 0) {
+            --nonZeroIndex;
         }
+        Degrees_.resize(size_t(nonZeroIndex + 1));
     }
 
     std::ostream& operator<<(std::ostream &os, const Monomial& m) {
-        for (size_t variableIndex = 0; variableIndex < m.size(); ++variableIndex) {
-            if (m[variableIndex] > 1) {
-                os << "(" << (char) ('a' + variableIndex) << "^" << m[variableIndex] << ")";
-            } else if (m[variableIndex] == 1) {
+        for (size_t variableIndex = 0; variableIndex < m.Degrees_.size(); ++variableIndex) {
+            if (m.Degrees_[variableIndex] > 1) {
+                os << "(" << (char) ('a' + variableIndex) << "^" << m.Degrees_[variableIndex] << ")";
+            } else if (m.Degrees_[variableIndex] == 1) {
                 os << (char) ('a' + variableIndex);
             }
         }
