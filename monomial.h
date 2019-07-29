@@ -1,18 +1,20 @@
 #ifndef GROEBNERBASIS_MONOMIAL_H
 #define GROEBNERBASIS_MONOMIAL_H
 
-#include <vector>
+#include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace Groebner {
-    using DegreeType = size_t;
-    using IntegerVector = std::vector<DegreeType>;
     class Monomial {
      public:
-        Monomial() = default;
-        Monomial(const Monomial&) = default;
-        Monomial(Monomial&&) = default;
-        Monomial(std::initializer_list<size_t> ilist);
+        using DegreeType = size_t;
+        using DegreeContainer = std::vector<DegreeType>;
+
+        Monomial() {}
+        Monomial(std::initializer_list<DegreeType>);
+
+        DegreeType degree(size_t) const;
 
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);
@@ -26,7 +28,7 @@ namespace Groebner {
 
         friend std::ostream& operator<<(std::ostream &os, const Monomial& m);
      private:
-        IntegerVector Degrees_;
+        DegreeContainer Degrees_;
         void trimTrailingZeroes();
     };
 }

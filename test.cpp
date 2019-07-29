@@ -48,6 +48,11 @@ namespace Groebner {
         if (m13 * m14 != m14 * m13) {
             throw std::runtime_error("Multiplication should be commutative");
         }
+
+        Monomial m16({2, 0, 7});
+        if (m16.degree(0) != 2 || m16.degree(1) != 0 || m16.degree(2) != 7 || m16.degree(1000) != 0) {
+            throw std::runtime_error("Degree function works incorrectly");
+        }
     }
 
     void test_all() {
