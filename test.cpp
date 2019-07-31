@@ -53,9 +53,36 @@ namespace Groebner {
         if (m16.degree(0) != 2 || m16.degree(1) != 0 || m16.degree(2) != 7 || m16.degree(1000) != 0) {
             throw std::runtime_error("Degree function works incorrectly");
         }
+        if (m16.totalDegree() != 9) {
+            throw std::runtime_error("Wrong total degree calculation");
+        }
+    }
+
+    void test_monomial_order() {
+        Monomial A({2, 3, 4});
+        Monomial B({2, 3, 4, 5});
+        Monomial C({5});
+        Monomial D({3, 6});
+        // A < B
+        // D < C
+        if (!lexOrder.isLess(A, B) || !lexOrder.isLess(D, C)) {
+            throw std::runtime_error("Wrong lexicographical compare");
+        }
+
+        // A < B
+        // A = D
+        if (!degreeOrder.isLess(A, B) || degreeOrder.isLess(A, D) || degreeOrder.isLess(D, A)) {
+            throw std::runtime_error("Wrong degree compare");
+        }
+
+        // A < D
+        if (!degreeLexOrder.isLess(A, D)) {
+            throw std::runtime_error("Wrong degree-lexicographical compare");
+        }
     }
 
     void test_all() {
         test_monomials();
+        test_monomial_order();
     }
 }

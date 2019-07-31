@@ -12,6 +12,10 @@ namespace Groebner {
         return 0;
     }
 
+    Monomial::DegreeType Monomial::totalDegree() const {
+        return std::accumulate(Degrees_.begin(), Degrees_.end(), DegreeType(0));
+    }
+
     Monomial& Monomial::operator*=(const Monomial& other) {
         Degrees_.resize(std::max(Degrees_.size(), other.Degrees_.size()));
         for (size_t variableIndex = 0; variableIndex < other.Degrees_.size(); ++variableIndex) {

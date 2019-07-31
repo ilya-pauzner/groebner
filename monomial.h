@@ -1,8 +1,8 @@
 #ifndef GROEBNERBASIS_MONOMIAL_H
 #define GROEBNERBASIS_MONOMIAL_H
 
-#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 namespace Groebner {
@@ -15,6 +15,8 @@ namespace Groebner {
         Monomial(std::initializer_list<DegreeType>);
 
         DegreeType degree(size_t) const;
+
+        DegreeType totalDegree() const;
 
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);
