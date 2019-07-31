@@ -11,7 +11,7 @@ namespace Groebner {
         using DegreeType = size_t;
         using DegreeContainer = std::vector<DegreeType>;
 
-        Monomial() {}
+        Monomial() = default;
         Monomial(std::initializer_list<DegreeType>);
 
         DegreeType degree(size_t) const;

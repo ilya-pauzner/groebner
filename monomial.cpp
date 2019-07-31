@@ -66,17 +66,18 @@ namespace Groebner {
     }
 
     void Monomial::trimTrailingZeroes() {
-        if (!Degrees_.empty()) {
-            size_t nonZeroIndex = Degrees_.size() - 1;
-            while (nonZeroIndex > 0 && Degrees_[nonZeroIndex] == 0) {
-                --nonZeroIndex;
-            }
-            size_t newSize = nonZeroIndex;
-            if (Degrees_[nonZeroIndex] != 0) {
-                ++newSize;
-            }
-            Degrees_.resize(newSize);
+        if (Degrees_.empty()) {
+            return;
         }
+        size_t nonZeroIndex = Degrees_.size() - 1;
+        while (nonZeroIndex > 0 && Degrees_[nonZeroIndex] == 0) {
+            --nonZeroIndex;
+        }
+        size_t newSize = nonZeroIndex;
+        if (Degrees_[nonZeroIndex] != 0) {
+            ++newSize;
+        }
+        Degrees_.resize(newSize);
     }
 
     std::ostream& operator<<(std::ostream& os, const Monomial& m) {
