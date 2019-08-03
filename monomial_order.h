@@ -11,7 +11,7 @@ namespace Groebner {
         explicit MonomialOrder(MonomialComparator cmp) : compareFunction(std::move(cmp)) {}
         bool isLess(const Monomial& lhs, const Monomial& rhs) const { return compareFunction(lhs, rhs); }
      private:
-         MonomialComparator compareFunction;
+        MonomialComparator compareFunction;
     };
 
     bool lexCompare(const Monomial&, const Monomial&);

@@ -21,14 +21,14 @@ namespace Groebner {
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);
 
-        bool isDivisibleBy(const Monomial &other) const;
-        Monomial&operator/=(const Monomial& other);
+        bool isDivisibleBy(const Monomial& other) const;
+        Monomial& operator/=(const Monomial& other);
         friend Monomial operator/(const Monomial&, const Monomial&);
 
         friend bool operator==(const Monomial&, const Monomial&);
         friend bool operator!=(const Monomial&, const Monomial&);
 
-        friend std::ostream& operator<<(std::ostream &os, const Monomial& m);
+        friend std::ostream& operator<<(std::ostream& os, const Monomial& m);
      private:
         DegreeContainer Degrees_;
         void trimTrailingZeroes();
