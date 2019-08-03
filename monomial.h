@@ -12,11 +12,15 @@ namespace Groebner {
         using DegreeContainer = std::vector<DegreeType>;
 
         Monomial() = default;
+        explicit Monomial(DegreeContainer&& container);
+        explicit Monomial(const DegreeContainer& container);
         Monomial(std::initializer_list<DegreeType>);
 
         DegreeType degree(size_t) const;
 
         DegreeType totalDegree() const;
+
+        size_t variablesCount() const;
 
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);

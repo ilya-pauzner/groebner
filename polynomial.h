@@ -54,7 +54,7 @@ namespace Groebner {
             return data.begin();
         };
 
-        typename TermMap::const_iterator cbegin() {
+        typename TermMap::const_iterator cbegin() const {
             return data.cbegin();
         };
 
@@ -62,7 +62,7 @@ namespace Groebner {
             return data.end();
         };
 
-        typename TermMap::const_iterator cend() {
+        typename TermMap::const_iterator cend() const {
             return data.cend();
         };
 
@@ -70,7 +70,7 @@ namespace Groebner {
             return data.rbegin();
         };
 
-        typename TermMap::const_reverse_iterator crbegin() {
+        typename TermMap::const_reverse_iterator crbegin() const {
             return data.crbegin();
         };
 
@@ -78,7 +78,7 @@ namespace Groebner {
             return data.rend();
         };
 
-        typename TermMap::const_reverse_iterator crend() {
+        typename TermMap::const_reverse_iterator crend() const {
             return data.crend();
         };
 
