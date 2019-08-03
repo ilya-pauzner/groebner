@@ -62,6 +62,9 @@ namespace Groebner {
                 for (size_t polynomialIndex2 = polynomialIndex1 + 1; polynomialIndex2 < set->size(); ++polynomialIndex2) {
                     auto S = S_Polynomial((*set)[polynomialIndex1], (*set)[polynomialIndex2]);
                     ReduceOverSet(*set, &S);
+                    if (S != Polynomial<FieldElement, Order>()) {
+                        newbies.emplace_back(std::move(S));
+                    }
                 }
             }
             if (newbies.empty()) {
