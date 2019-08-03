@@ -81,8 +81,37 @@ namespace Groebner {
         }
     }
 
+    void test_polynomials() {
+        Polynomial<int, &degreeLexOrder> polyA({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, 3}});
+        Polynomial<int, &degreeLexOrder> polyB({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, -3}});
+
+        auto polyAplusB = polyA + polyB;
+        auto polyAplusBexplicit = Polynomial<int, &degreeLexOrder>({{Monomial({1, 2}), 4}});
+        if (polyAplusB != polyAplusBexplicit) {
+            throw std::runtime_error("Polynomial addition does not work as intended");
+        }
+
+        auto polyAminusB = polyA - polyB;
+        auto polyAminusBexplicit = Polynomial<int, &degreeLexOrder>({{Monomial({0, 1, 2}), 6}});
+        if (polyAminusB != polyAminusBexplicit) {
+            throw std::runtime_error("Polynomial substraction does not work as intended");
+        }
+
+        auto polyAxB = polyA * polyB;
+        auto polyAxBexplicit = Polynomial<int, &degreeLexOrder>({{Monomial({2, 4}), 4}, {Monomial({0, 2, 4}), -9}});
+        if (polyAxB != polyAxBexplicit) {
+            throw std::runtime_error("Polynomial multiplication does not work as intended");
+        }
+
+        Polynomial<int, &degreeLexOrder> x({{Monomial({1}), 1}});
+        if (x + x != x + Monomial({1})) {
+            throw std::runtime_error("Addition with monomial does not work as intended");
+        }
+    }
+
     void test_all() {
         test_monomials();
         test_monomial_order();
+        test_polynomials();
     }
 }
