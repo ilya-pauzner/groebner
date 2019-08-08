@@ -1,8 +1,8 @@
 #ifndef GROEBNERBASIS_MONOMIAL_H
 #define GROEBNERBASIS_MONOMIAL_H
 
-#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 namespace Groebner {
@@ -12,21 +12,27 @@ namespace Groebner {
         using DegreeContainer = std::vector<DegreeType>;
 
         Monomial() = default;
+        explicit Monomial(DegreeContainer&& container);
+        explicit Monomial(const DegreeContainer& container);
         Monomial(std::initializer_list<DegreeType>);
 
         DegreeType degree(size_t) const;
 
+        DegreeType totalDegree() const;
+
+        size_t variablesCount() const;
+
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);
 
-        bool isDivisibleBy(const Monomial &other) const;
-        Monomial&operator/=(const Monomial& other);
+        bool isDivisibleBy(const Monomial& other) const;
+        Monomial& operator/=(const Monomial& other);
         friend Monomial operator/(const Monomial&, const Monomial&);
 
         friend bool operator==(const Monomial&, const Monomial&);
         friend bool operator!=(const Monomial&, const Monomial&);
 
-        friend std::ostream& operator<<(std::ostream &os, const Monomial& m);
+        friend std::ostream& operator<<(std::ostream& os, const Monomial& m);
      private:
         DegreeContainer Degrees_;
         void trimTrailingZeroes();

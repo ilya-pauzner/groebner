@@ -1,6 +1,14 @@
 #include "monomial.h"
 
 namespace Groebner {
+    Monomial::Monomial(const DegreeContainer& container) : Degrees_(container) {
+        trimTrailingZeroes();
+    }
+
+    Monomial::Monomial(DegreeContainer&& container) : Degrees_(std::move(container)) {
+        trimTrailingZeroes();
+    }
+
     Monomial::Monomial(std::initializer_list<Monomial::DegreeType> ilist) : Degrees_(ilist) {
         trimTrailingZeroes();
     }
@@ -10,6 +18,14 @@ namespace Groebner {
             return Degrees_[variableIndex];
         }
         return 0;
+    }
+
+    Monomial::DegreeType Monomial::totalDegree() const {
+        return std::accumulate(Degrees_.begin(), Degrees_.end(), DegreeType(0));
+    }
+
+    size_t Monomial::variablesCount() const {
+        return Degrees_.size();
     }
 
     Monomial& Monomial::operator*=(const Monomial& other) {
