@@ -111,6 +111,29 @@ namespace Groebner {
         }
         ReduceSetOverItself(set);
     }
+
+    template <typename FieldElement, MonomialOrder* Order>
+    bool LaysInIdeal(std::vector<Polynomial<FieldElement, Order>> ideal, Polynomial<FieldElement, Order> p) {
+        ReduceSetOverItself(&ideal);
+        ReduceOverSet(ideal, &p);
+        return p == Polynomial<FieldElement, Order>();
+    }
+
+    template <typename FieldElement, MonomialOrder* Order>
+    bool LaysInRadical(std::vector<Polynomial<FieldElement, Order>> ideal, Polynomial<FieldElement, Order> p) {
+        size_t maxVariableNumber = 0;
+        for (auto& polynomial : ideal) {
+            for (auto& term : polynomial) {
+                maxVariableNumber = std::max(maxVariableNumber, term.first.variablesCount());
+            }
+        }
+        Monomial::DegreeContainer degrees(maxVariableNumber);
+        degrees.push_back(1);
+        Polynomial<FieldElement, Order> z({{Monomial(degrees), 1}});
+        Polynomial<FieldElement, Order> one({{Monomial(), 1}});
+        ideal.push_back(p * z - one);
+        return LaysInIdeal(ideal, one);
+    }
 }
 
 #endif //GROEBNER_ALGORITHM_H

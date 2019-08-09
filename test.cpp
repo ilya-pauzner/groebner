@@ -206,6 +206,12 @@ namespace Groebner {
             std::cout << elem << std::endl;
         }
         std::cout << std::string(80, '=') << std::endl;
+
+        std::cout << LaysInIdeal(polys7, polys7[0]) << std::endl;
+        std::cout << std::string(80, '=') << std::endl;
+
+        std::cout << LaysInRadical(polys7, polys7[0]) << std::endl;
+        std::cout << std::string(80, '=') << std::endl;
     }
 
     void test_algorithm_grlex() {
