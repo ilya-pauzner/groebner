@@ -7,11 +7,11 @@
 namespace Groebner {
     template <typename FieldElement, MonomialOrder* Order>
     bool tryReduce(const Polynomial<FieldElement, Order>& f, Polynomial<FieldElement, Order>* g) {
-        auto leadingTerm = f.crbegin();
+        auto leadingTerm = f.leadingTerm();
         for (const auto& term : *g) {
-            if (term.first.isDivisibleBy(leadingTerm->first)) {
-                Monomial monomialQuotient = term.first / leadingTerm->first;
-                Polynomial<FieldElement, Order> quotient({{monomialQuotient, term.second / leadingTerm->second}});
+            if (term.first.isDivisibleBy(leadingTerm.first)) {
+                Monomial monomialQuotient = term.first / leadingTerm.first;
+                Polynomial<FieldElement, Order> quotient({{monomialQuotient, term.second / leadingTerm.second}});
                 *g -= quotient * f;
                 return true;
             }
@@ -30,12 +30,12 @@ namespace Groebner {
 
     template <typename FieldElement, MonomialOrder* Order>
     Polynomial<FieldElement, Order> S_Polynomial(const Polynomial<FieldElement, Order>& f1, const Polynomial<FieldElement, Order>& f2) {
-        auto leadingTerm1 = f1.crbegin();
-        auto leadingTerm2 = f2.crbegin();
-        Monomial lcm12 = lcm(leadingTerm1->first, leadingTerm2->first);
-        Monomial m1 = lcm12 / leadingTerm1->first;
-        Monomial m2 = lcm12 / leadingTerm2->first;
-        return Polynomial<FieldElement, Order>({{m1, leadingTerm2->second}}) * f1 - Polynomial<FieldElement, Order>({{m2, leadingTerm1->second}}) * f2;
+        auto leadingTerm1 = f1.leadingTerm();
+        auto leadingTerm2 = f2.leadingTerm();
+        Monomial lcm12 = lcm(leadingTerm1.first, leadingTerm2.first);
+        Monomial m1 = lcm12 / leadingTerm1.first;
+        Monomial m2 = lcm12 / leadingTerm2.first;
+        return Polynomial<FieldElement, Order>({{m1, leadingTerm2.second}}) * f1 - Polynomial<FieldElement, Order>({{m2, leadingTerm1.second}}) * f2;
     }
 
     template <typename FieldElement, MonomialOrder* Order>
@@ -55,14 +55,35 @@ namespace Groebner {
     }
 
     template <typename FieldElement, MonomialOrder* Order>
-    void DoBuhberger(std::vector<Polynomial<FieldElement, Order>>* set) {
-        for (size_t i = 0; i < set->size(); ++i) {
-            auto leadingTerm = ((*set)[i]).crbegin();
-            FieldElement coeff = leadingTerm->second;
-            for (auto& elem : ((*set)[i])) {
-                (*set)[i].data[elem.first] = elem.second / coeff;
+    void ReduceSetOverItself(std::vector<Polynomial<FieldElement, Order>>* set) {
+        while (true) {
+            bool reductions = false;
+            for (auto& polynomial : *set) {
+                auto new_set = *set;
+                new_set.erase(std::find(new_set.begin(), new_set.end(), polynomial));
+                reductions |= ReduceOverSet(new_set, &polynomial);
+                if (polynomial == Polynomial<FieldElement, Order>()) {
+                    *set = new_set;
+                    break;
+                }
+            }
+            if (!reductions) {
+                break;
             }
         }
+    }
+
+    template <typename FieldElement, MonomialOrder* Order>
+    void LeadingTermToOne(std::vector<Polynomial<FieldElement, Order>>* set) {
+        for (auto& polynomial : *set) {
+            polynomial /= polynomial.leadingTerm().second;
+        }
+    }
+
+    template <typename FieldElement, MonomialOrder* Order>
+    void DoBuhberger(std::vector<Polynomial<FieldElement, Order>>* set) {
+        LeadingTermToOne(set);
+        ReduceSetOverItself(set);
         while (true) {
             std::vector<Polynomial<FieldElement, Order>> newbies;
             for (size_t polynomialIndex1 = 0; polynomialIndex1 < set->size(); ++polynomialIndex1) {
@@ -75,16 +96,16 @@ namespace Groebner {
                 }
             }
             if (newbies.empty()) {
-                return;
+                break;
             }
-            for (auto polynomial : newbies) {
+            LeadingTermToOne(&newbies);
+            for (auto& polynomial : newbies) {
                 if (std::find(set->begin(), set->end(), polynomial) == set->end()) {
                     (*set).emplace_back(std::move(polynomial));
                 }
-                std::cout << polynomial << std::endl;
             }
-            std::cout << set->size() << std::endl;
         }
+        ReduceSetOverItself(set);
     }
 }
 

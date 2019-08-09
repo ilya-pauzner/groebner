@@ -17,7 +17,7 @@ namespace Groebner {
     template <typename FieldElement, MonomialOrder* Order>
     class Polynomial {
         using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<Order>>;
-     public:
+     private:
         TermMap data;
 
         void trimZeroes() {
@@ -82,6 +82,10 @@ namespace Groebner {
             return data.crend();
         };
 
+        Term leadingTerm() const {
+            return *crbegin();
+        }
+
         std::vector<Term> dump() const {
             std::vector<Term> result;
             std::copy(data.begin(), data.end(), std::back_inserter(result));
@@ -133,6 +137,19 @@ namespace Groebner {
             return res;
         }
 
+        Polynomial& operator/=(const FieldElement& f) {
+            for (const Term& term : data) {
+                data[term.first] /= f;
+            }
+            return *this;
+        }
+
+        friend Polynomial operator/(const Polynomial& lhs, const FieldElement& f) {
+            Polynomial ret(lhs);
+            ret /= f;
+            return ret;
+        }
+
         friend bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
             return lhs.data == rhs.data;
         }
@@ -146,7 +163,10 @@ namespace Groebner {
                 if (termIterator != p.data.rbegin()) {
                     os << " + ";
                 }
-                os << "(" << termIterator->second << ")" << termIterator->first;
+                if (termIterator->second != 1) {
+                    os << "(" << termIterator->second << ")";
+                }
+                os << termIterator->first;
             }
             return os;
         }

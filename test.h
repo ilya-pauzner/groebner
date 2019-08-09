@@ -15,7 +15,8 @@ namespace Groebner {
     void test_polynomials();
     void test_algorithm();
 
-    Polynomial<boost::rational<long long>, &degreeLexOrder> random_polynomial();
+    Monomial random_monomial();
+    Polynomial<boost::rational<long long>, &lexOrder> random_polynomial();
 
     void test_all();
 }

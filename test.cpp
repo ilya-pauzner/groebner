@@ -123,49 +123,79 @@ namespace Groebner {
         return Monomial(v);
     }
 
-    Polynomial<boost::rational<long long>, &degreeLexOrder> random_polynomial() {
-        Polynomial<boost::rational<long long>, &degreeLexOrder> res;
+    Polynomial<boost::rational<long long>, &lexOrder> random_polynomial() {
+        Polynomial<boost::rational<long long>, &lexOrder> res;
         for (size_t i = 0; i < 3; ++i) {
-            res += Polynomial<boost::rational<long long>, &degreeLexOrder>({{random_monomial(), mt() % 5}});
+            res += Polynomial<boost::rational<long long>, &lexOrder>({{random_monomial(), mt() % 5}});
         }
         return res;
     }
 
     void test_algorithm() {
-        Polynomial<boost::rational<long long>, &degreeLexOrder> x({{Monomial({1}), 1}});
-        Polynomial<boost::rational<long long>, &degreeLexOrder> y({{Monomial({0, 1}), 1}});
-        Polynomial<boost::rational<long long>, &degreeLexOrder> z({{Monomial({0, 0, 1}), 1}});
-        Polynomial<boost::rational<long long>, &degreeLexOrder> w({{Monomial({0, 0, 0, 1}), 1}});
-        /*auto f1 = x * y - w;
-        auto f2 = x * z - w;
-        std::vector<typeof(f1)> polys({f1, f2});
-        DoBuhberger(&polys);
-        for (const auto& elem : polys) {
-            // std::cout << elem << std::endl;
-        }
-        std::cout << "\nBefore\n";
-        auto f3 = x * x * x - boost::rational<long long>(2) * x * y;;
-        auto f4 = x * x * y - boost::rational<long long>(2) * y * y + x;
-        std::vector<typeof(f3)> polys2({f3, f4});
-        for (const auto& elem : polys2) {
+        Polynomial<boost::rational<long long>, &lexOrder> a({{Monomial({1}), 1}});
+        Polynomial<boost::rational<long long>, &lexOrder> b({{Monomial({0, 1}), 1}});
+        Polynomial<boost::rational<long long>, &lexOrder> c({{Monomial({0, 0, 1}), 1}});
+        Polynomial<boost::rational<long long>, &lexOrder> one({{Monomial(), 1}});
+        auto f11 = a * a - one;
+        auto f12 = (a - one) * b;
+        auto f13 = (a + one) * c;
+        std::vector<typeof(f11)> polys1({f11, f12, f13});
+        DoBuhberger(&polys1);
+        for (const auto& elem : polys1) {
             std::cout << elem << std::endl;
         }
+        std::cout << std::string(80, '=') << std::endl;
+
+        auto f21 = f11;
+        auto f22 = f12;
+        auto f23 = (a - one) * c;
+        std::vector<typeof(f11)> polys2({f21, f22, f23});
         DoBuhberger(&polys2);
-        std::cout << "\nAfter\n";
         for (const auto& elem : polys2) {
             std::cout << elem << std::endl;
-        } */
-        for (size_t i = 0; i < 10; ++i) {
-            std::vector<typeof(x)> polys3;
-            for (size_t j = 0; j < 3; ++j) {
-                polys3.push_back(random_polynomial());
-            }
-            DoBuhberger(&polys3);
-            for (const auto &elem : polys3) {
-                std::cout << elem << std::endl;
-            }
-            return;
         }
+        std::cout << std::string(80, '=') << std::endl;
+
+
+        auto f31 = a * a * a * b * c - a * c * c;
+        auto f32 = a * b * b * c - a * b * c;
+        auto f33 = a * a * b * b - c;
+        std::vector<typeof(f11)> polys3({f31, f32, f33});
+        DoBuhberger(&polys3);
+        for (const auto& elem : polys3) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
+
+        auto f41 = a * a * b + a * c + b * b * c;
+        auto f42 = a * c * c - b * c;
+        auto f43 = a * b * c - b * b;
+        std::vector<typeof(f11)> polys4({f41, f42, f43});
+        DoBuhberger(&polys4);
+        for (const auto& elem : polys4) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
+
+        auto f51 = a * b * b - c - c * c;
+        auto f52 = a * a * b - b;
+        auto f53 = b * b - c * c;
+        std::vector<typeof(f11)> polys5({f51, f52, f53});
+        DoBuhberger(&polys5);
+        for (const auto& elem : polys5) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
+
+        auto f61 = a * b + a * a * c;
+        auto f62 = a * c + b * c * c * c;
+        auto f63 = b * c - b * b * c * c * c;
+        std::vector<typeof(f11)> polys6({f61, f62, f63});
+        DoBuhberger(&polys6);
+        for (const auto& elem : polys6) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
     }
 
     void test_all() {
