@@ -88,10 +88,14 @@ namespace Groebner {
             std::vector<Polynomial<FieldElement, Order>> newbies;
             for (size_t polynomialIndex1 = 0; polynomialIndex1 < set->size(); ++polynomialIndex1) {
                 for (size_t polynomialIndex2 = polynomialIndex1 + 1; polynomialIndex2 < set->size(); ++polynomialIndex2) {
-                    auto S = S_Polynomial((*set)[polynomialIndex1], (*set)[polynomialIndex2]);
-                    ReduceOverSet(*set, &S);
-                    if (S != Polynomial<FieldElement, Order>()) {
-                        newbies.emplace_back(std::move(S));
+                    auto& p = (*set)[polynomialIndex1];
+                    auto& q = (*set)[polynomialIndex2];
+                    if (lcm(p.leadingTerm().first, q.leadingTerm().first) != p.leadingTerm().first * q.leadingTerm().first) {
+                        auto S = S_Polynomial((*set)[polynomialIndex1], (*set)[polynomialIndex2]);
+                        ReduceOverSet(*set, &S);
+                        if (S != Polynomial<FieldElement, Order>()) {
+                            newbies.emplace_back(std::move(S));
+                        }
                     }
                 }
             }

@@ -131,7 +131,7 @@ namespace Groebner {
         return res;
     }
 
-    void test_algorithm() {
+    void test_algorithm_lex() {
         Polynomial<boost::rational<long long>, &lexOrder> a({{Monomial({1}), 1}});
         Polynomial<boost::rational<long long>, &lexOrder> b({{Monomial({0, 1}), 1}});
         Polynomial<boost::rational<long long>, &lexOrder> c({{Monomial({0, 0, 1}), 1}});
@@ -196,6 +196,36 @@ namespace Groebner {
             std::cout << elem << std::endl;
         }
         std::cout << std::string(80, '=') << std::endl;
+
+        auto f71 = a * a + b * b + c * c - one;
+        auto f72 = a * a + c * c - b;
+        auto f73 = a - c;
+        std::vector<typeof(f11)> polys7({f71, f72, f73});
+        DoBuhberger(&polys7);
+        for (const auto& elem : polys7) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
+    }
+
+    void test_algorithm_grlex() {
+        Polynomial<boost::rational<long long>, &degreeLexOrder> a({{Monomial({1}), 1}});
+        Polynomial<boost::rational<long long>, &degreeLexOrder> b({{Monomial({0, 1}), 1}});
+        Polynomial<boost::rational<long long>, &degreeLexOrder> c({{Monomial({0, 0, 1}), 1}});
+        Polynomial<boost::rational<long long>, &degreeLexOrder> one({{Monomial(), 1}});
+        auto f11 = a * c - b * b;
+        auto f12 = a * a * a - c * c;
+        std::vector<typeof(f11)> polys1({f11, f12});
+        DoBuhberger(&polys1);
+        for (const auto& elem : polys1) {
+            std::cout << elem << std::endl;
+        }
+        std::cout << std::string(80, '=') << std::endl;
+    }
+
+    void test_algorithm() {
+        test_algorithm_lex();
+        test_algorithm_grlex();
     }
 
     void test_all() {
