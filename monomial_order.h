@@ -5,24 +5,29 @@
 #include "monomial.h"
 
 namespace Groebner {
-    class MonomialOrder {
+    class LexOrder {
      public:
-        using MonomialComparator = std::function<bool(const Monomial&, const Monomial&)>;
-        explicit MonomialOrder(MonomialComparator cmp) : compareFunction(std::move(cmp)) {}
-        bool isLess(const Monomial& lhs, const Monomial& rhs) const { return compareFunction(lhs, rhs); }
-     private:
-        MonomialComparator compareFunction;
+        static bool isLess(const Monomial& lhs, const Monomial& rhs);
     };
 
-    bool lexCompare(const Monomial&, const Monomial&);
-    static MonomialOrder lexOrder(lexCompare);
+    class DegreeOrder {
+     public:
+        static bool isLess(const Monomial& lhs, const Monomial& rhs);
+    };
 
-    bool degreeCompare(const Monomial&, const Monomial&);
-    static MonomialOrder degreeOrder(degreeCompare);
+    template <class TOrder1, class TOrder2>
+    class Sum {
+     public:
+        static bool isLess(const Monomial& first, const Monomial& second) {
+            if (TOrder1::isLess(first, second))
+                return true;
+            if (TOrder1::isLess(second, first))
+                return false;
+            return TOrder2::isLess(first, second);
+        }
+    };
 
-    MonomialOrder combine(const MonomialOrder&, const MonomialOrder&);
-
-    static MonomialOrder degreeLexOrder = combine(degreeOrder, lexOrder);
+    using DegreeLexOrder = Sum<DegreeOrder, LexOrder>;
 
 }
 

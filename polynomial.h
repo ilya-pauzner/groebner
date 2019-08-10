@@ -6,17 +6,17 @@
 #include <vector>
 
 namespace Groebner {
-    template <MonomialOrder* Order>
+    template <typename OrderType>
     class OrderAdaptor {
      public:
         bool operator()(const Monomial& lhs, const Monomial& rhs) const {
-            return Order->isLess(lhs, rhs);
+            return OrderType::isLess(lhs, rhs);
         }
     };
 
-    template <typename FieldElement, MonomialOrder* Order>
+    template <typename FieldElement, typename OrderType>
     class Polynomial {
-        using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<Order>>;
+        using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<OrderType>>;
      private:
         TermMap data;
 
