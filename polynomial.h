@@ -17,22 +17,8 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     class Polynomial {
         using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<OrderType>>;
-     private:
-        TermMap data;
-
-        void trimZeroes() {
-            std::vector<Monomial> zeroMonomials;
-            for (const Term& term : data) {
-                if (term.second == 0) {
-                    zeroMonomials.push_back(term.first);
-                }
-            }
-            for (const Monomial& monomial : zeroMonomials) {
-                data.erase(monomial);
-            }
-        }
+        using Term = typename TermMap::value_type;
      public:
-        using Term = std::pair<Monomial, FieldElement>;
 
         Polynomial() = default;
         Polynomial(std::initializer_list<Term> source) {
@@ -42,13 +28,11 @@ namespace Groebner {
             trimZeroes();
         }
 
-        Polynomial(const Monomial& m) {
-            *this = Polynomial({{m, 1}});
-        }
+        Polynomial(Monomial m) : Polynomial{{std::move(m), 1}} {}
 
-        Polynomial(const FieldElement& f) {
-            *this = Polynomial({{Monomial(), f}});
-        }
+        Polynomial(FieldElement f) : Polynomial{{Monomial(), std::move(f)}} {}
+
+        Polynomial(Term t) : Polynomial{{std::move(t)}} {}
 
         typename TermMap::iterator begin() {
             return data.begin();
@@ -81,12 +65,6 @@ namespace Groebner {
         typename TermMap::const_reverse_iterator crend() const {
             return data.crend();
         };
-
-        std::vector<Term> dump() const {
-            std::vector<Term> result;
-            std::copy(data.begin(), data.end(), std::back_inserter(result));
-            return result;
-        }
 
         Polynomial& operator+=(const Polynomial& other) {
             for (const Term& term : other.data) {
@@ -148,6 +126,24 @@ namespace Groebner {
                 }
                 os << termIterator->second << termIterator->first;
             }
+        }
+     private:
+        TermMap data;
+
+        const Monomial& getMonomial(const Term& pair) {
+            return pair.first;
+        }
+
+        const FieldElement& getCoefficient(const Term& pair) {
+            return pair.second;
+        }
+
+        FieldElement& getCoefficient(Term& pair) {
+            return pair.second;
+        }
+
+        void trimZeroes() {
+            for (auto iter = data.cbegin(); iter != data.cend(); (getCoefficient(*iter) == 0 ? data.erase(iter++) : ++iter));
         }
     };
 

@@ -20,7 +20,7 @@ namespace Groebner {
         return std::accumulate(Degrees_.begin(), Degrees_.end(), DegreeType(0));
     }
 
-    size_t Monomial::variablesCount() const {
+    size_t Monomial::greatestVariableIndex() const {
         return Degrees_.size();
     }
 

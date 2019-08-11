@@ -20,7 +20,7 @@ namespace Groebner {
 
         DegreeType totalDegree() const;
 
-        size_t variablesCount() const;
+        size_t greatestVariableIndex() const;
 
         Monomial& operator*=(const Monomial& other);
         friend Monomial operator*(const Monomial&, const Monomial&);

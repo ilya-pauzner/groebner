@@ -85,6 +85,22 @@ namespace Groebner {
         Polynomial<int, DegreeLexOrder> polyA({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, 3}});
         Polynomial<int, DegreeLexOrder> polyB({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, -3}});
 
+        Polynomial<int, DegreeLexOrder> polycC;
+        for (const auto& term : polyA) {
+            polycC += term;
+        }
+        if (polyA != polycC) {
+            throw std::runtime_error("Polynomial += does not work as intended");
+        }
+
+        Polynomial<int, DegreeLexOrder> one1 = 1;
+        Polynomial<int, DegreeLexOrder> zero1 = 0;
+        Polynomial<int, DegreeLexOrder> one2 = Monomial();
+        Polynomial<int, DegreeLexOrder> zero2;
+        if (zero1 != zero2 || one1 != one2) {
+            throw std::runtime_error("These polynomials are posed as not equal, that's incorrect.");
+        }
+
         auto polyAplusB = polyA + polyB;
         auto polyAplusBexplicit = Polynomial<int, DegreeLexOrder>({{Monomial({1, 2}), 4}});
         if (polyAplusB != polyAplusBexplicit) {
