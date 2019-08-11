@@ -130,15 +130,15 @@ namespace Groebner {
      private:
         TermMap data;
 
-        const Monomial& getMonomial(const Term& pair) {
+        static const Monomial& getMonomial(const Term& pair) {
             return pair.first;
         }
 
-        const FieldElement& getCoefficient(const Term& pair) {
+        static const FieldElement& getCoefficient(const Term& pair) {
             return pair.second;
         }
 
-        FieldElement& getCoefficient(Term& pair) {
+        static FieldElement& getCoefficient(Term& pair) {
             return pair.second;
         }
 
