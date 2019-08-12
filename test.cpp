@@ -53,9 +53,81 @@ namespace Groebner {
         if (m16.degree(0) != 2 || m16.degree(1) != 0 || m16.degree(2) != 7 || m16.degree(1000) != 0) {
             throw std::runtime_error("Degree function works incorrectly");
         }
+        if (m16.totalDegree() != 9) {
+            throw std::runtime_error("Wrong total degree calculation");
+        }
+    }
+
+    void test_monomial_order() {
+        Monomial A({2, 3, 4});
+        Monomial B({2, 3, 4, 5});
+        Monomial C({5});
+        Monomial D({3, 6});
+        // A < B
+        // D < C
+        if (!LexOrder::isLess(A, B) || !LexOrder::isLess(D, C)) {
+            throw std::runtime_error("Wrong lexicographical compare");
+        }
+
+        // A < B
+        // A = D
+        if (!DegreeOrder::isLess(A, B) || DegreeOrder::isLess(A, D) || DegreeOrder::isLess(D, A)) {
+            throw std::runtime_error("Wrong degree compare");
+        }
+
+        // A < D
+        if (!DegreeLexOrder::isLess(A, D)) {
+            throw std::runtime_error("Wrong degree-lexicographical compare");
+        }
+    }
+
+    void test_polynomials() {
+        Polynomial<int, DegreeLexOrder> polyA({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, 3}});
+        Polynomial<int, DegreeLexOrder> polyB({{Monomial({1, 2}), 2}, {{Monomial({0, 1, 2})}, -3}});
+
+        Polynomial<int, DegreeLexOrder> polycC;
+        for (const auto& term : polyA) {
+            polycC += term;
+        }
+        if (polyA != polycC) {
+            throw std::runtime_error("Polynomial += does not work as intended");
+        }
+
+        Polynomial<int, DegreeLexOrder> one1 = 1;
+        Polynomial<int, DegreeLexOrder> zero1 = 0;
+        Polynomial<int, DegreeLexOrder> one2 = Monomial();
+        Polynomial<int, DegreeLexOrder> zero2;
+        if (zero1 != zero2 || one1 != one2) {
+            throw std::runtime_error("These polynomials are posed as not equal, that's incorrect.");
+        }
+
+        auto polyAplusB = polyA + polyB;
+        auto polyAplusBexplicit = Polynomial<int, DegreeLexOrder>({{Monomial({1, 2}), 4}});
+        if (polyAplusB != polyAplusBexplicit) {
+            throw std::runtime_error("Polynomial addition does not work as intended");
+        }
+
+        auto polyAminusB = polyA - polyB;
+        auto polyAminusBexplicit = Polynomial<int, DegreeLexOrder>({{Monomial({0, 1, 2}), 6}});
+        if (polyAminusB != polyAminusBexplicit) {
+            throw std::runtime_error("Polynomial substraction does not work as intended");
+        }
+
+        auto polyAxB = polyA * polyB;
+        auto polyAxBexplicit = Polynomial<int, DegreeLexOrder>({{Monomial({2, 4}), 4}, {Monomial({0, 2, 4}), -9}});
+        if (polyAxB != polyAxBexplicit) {
+            throw std::runtime_error("Polynomial multiplication does not work as intended");
+        }
+
+        Polynomial<int, DegreeLexOrder> x({{Monomial({1}), 1}});
+        if (x + x != x + Monomial({1})) {
+            throw std::runtime_error("Addition with monomial does not work as intended");
+        }
     }
 
     void test_all() {
         test_monomials();
+        test_monomial_order();
+        test_polynomials();
     }
 }
