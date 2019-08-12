@@ -66,6 +66,10 @@ namespace Groebner {
             return data.crend();
         };
 
+        Term leadingTerm() const {
+            return *crbegin();
+        }
+
         Polynomial& operator+=(const Polynomial& other) {
             for (const Term& term : other.data) {
                 data[term.first] += term.second;
@@ -111,6 +115,19 @@ namespace Groebner {
             return res;
         }
 
+        Polynomial& operator/=(const FieldElement& f) {
+            for (const Term& term : data) {
+                data[term.first] /= f;
+            }
+            return *this;
+        }
+
+        friend Polynomial operator/(const Polynomial& lhs, const FieldElement& f) {
+            Polynomial ret(lhs);
+            ret /= f;
+            return ret;
+        }
+
         friend bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
             return lhs.data == rhs.data;
         }
@@ -126,6 +143,7 @@ namespace Groebner {
                 }
                 os << termIterator->second << termIterator->first;
             }
+            return os;
         }
      private:
         TermMap data;
