@@ -7,16 +7,21 @@
 namespace Groebner {
     template <typename FieldElement, typename OrderType>
     bool tryReduce(const Polynomial<FieldElement, OrderType>& f, Polynomial<FieldElement, OrderType>* g) {
-        auto leadingTerm = f.leadingTerm();
-        for (const auto& term : *g) {
-            if (term.first.isDivisibleBy(leadingTerm.first)) {
-                Monomial monomialQuotient = term.first / leadingTerm.first;
-                Polynomial<FieldElement, OrderType> quotient({{monomialQuotient, term.second / leadingTerm.second}});
-                *g -= quotient * f;
-                return true;
-            }
+        using Polynomial_ = Polynomial<FieldElement, OrderType>;
+        const auto& leadingTerm = f.leadingTerm();
+        auto divisibleBy = [&](const typename Polynomial_::Term& t) {
+            return Polynomial_::getMonomial(t).isDivisibleBy(Polynomial_::getMonomial(leadingTerm));
+        };
+        auto divisibleTermPtr = std::find_if(g->begin(), g->end(), divisibleBy);
+        if (divisibleTermPtr == g->end()) {
+            return false;
         }
-        return false;
+
+        Monomial monomialQuotient = Polynomial_::getMonomial(*divisibleTermPtr) / Polynomial_::getMonomial(leadingTerm);
+        FieldElement coefficientQuotient = Polynomial_::getCoefficient(*divisibleTermPtr) / Polynomial_::getCoefficient(leadingTerm);
+        Polynomial_ quotient({{monomialQuotient, coefficientQuotient}});
+        *g -= quotient * f;
+        return true;
     }
 
     template <typename FieldElement, typename OrderType>
@@ -29,109 +34,122 @@ namespace Groebner {
     }
 
     template <typename FieldElement, typename OrderType>
-    Polynomial<FieldElement, OrderType> S_Polynomial(const Polynomial<FieldElement, OrderType>& f1, const Polynomial<FieldElement, OrderType>& f2) {
-        auto leadingTerm1 = f1.leadingTerm();
-        auto leadingTerm2 = f2.leadingTerm();
-        Monomial lcm12 = lcm(leadingTerm1.first, leadingTerm2.first);
-        Monomial m1 = lcm12 / leadingTerm1.first;
-        Monomial m2 = lcm12 / leadingTerm2.first;
-        return Polynomial<FieldElement, OrderType>({{m1, leadingTerm2.second}}) * f1 - Polynomial<FieldElement, OrderType>({{m2, leadingTerm1.second}}) * f2;
+    Polynomial<FieldElement, OrderType> S_Polynomial(const Polynomial<FieldElement, OrderType>& f1,
+                                                     const Polynomial<FieldElement, OrderType>& f2) {
+        using Polynomial_ = Polynomial<FieldElement, OrderType>;
+        const auto& leadingTerm1 = f1.leadingTerm();
+        const auto& leadingTerm2 = f2.leadingTerm();
+        Monomial lcm12 = lcm(Polynomial_::getMonomial(leadingTerm1), Polynomial_::getMonomial(leadingTerm2));
+        Monomial m1 = lcm12 / Polynomial_::getMonomial(leadingTerm1);
+        Monomial m2 = lcm12 / Polynomial_::getMonomial(leadingTerm2);
+        return f1 * m1 * Polynomial_::getCoefficient(leadingTerm2) - f2 * m2 * Polynomial_::getCoefficient(leadingTerm1);
     }
 
     template <typename FieldElement, typename OrderType>
-    bool ReduceOverSet(const std::vector<Polynomial<FieldElement, OrderType>>& set, Polynomial<FieldElement, OrderType>* g) {
+    bool ReduceOverSet(const PolynomialSet<FieldElement, OrderType>& set, Polynomial<FieldElement, OrderType>* g) {
         size_t totalReductions = 0;
-        while (true) {
-            size_t successfulReductions = 0;
+        size_t iterationReductions = 0;
+        do {
+            iterationReductions = 0;
             for (const auto& f : set) {
-                successfulReductions += ReduceAsPossible(f, g);
+                iterationReductions += ReduceAsPossible(f, g);
             }
-            totalReductions += successfulReductions;
-            if (successfulReductions == 0) {
-                break;
-            }
-        }
+            totalReductions += iterationReductions;
+        } while (iterationReductions > 0);
         return totalReductions > 0;
     }
 
     template <typename FieldElement, typename OrderType>
-    void ReduceSetOverItself(std::vector<Polynomial<FieldElement, OrderType>>* set) {
-        while (true) {
-            bool reductions = false;
-            for (auto& polynomial : *set) {
-                auto new_set = *set;
-                new_set.erase(std::find(new_set.begin(), new_set.end(), polynomial));
-                reductions |= ReduceOverSet(new_set, &polynomial);
-                if (polynomial == Polynomial<FieldElement, OrderType>()) {
-                    *set = new_set;
-                    break;
+    bool ReduceSetOverItself(PolynomialSet<FieldElement, OrderType>* set) {
+        using Polynomial_ = Polynomial<FieldElement, OrderType>;
+        size_t totalReductions = 0;
+        size_t iterationReductions = 0;
+        do {
+            iterationReductions = 0;
+            auto it = set->begin();
+            while (it != set->end()) {
+                auto it2 = (it++);
+                Polynomial_ p = *it2;
+                set->erase(p);
+                iterationReductions += ReduceOverSet(*set, &p);
+                if (p != Polynomial_()) {
+                    set->insert(p);
                 }
             }
-            if (!reductions) {
-                break;
-            }
-        }
+            totalReductions += iterationReductions;
+        } while (iterationReductions > 0);
+        return totalReductions > 0;
     }
 
     template <typename FieldElement, typename OrderType>
-    void LeadingTermToOne(std::vector<Polynomial<FieldElement, OrderType>>* set) {
-        for (auto& polynomial : *set) {
-            polynomial /= polynomial.leadingTerm().second;
+    void LeadingTermToOne(PolynomialSet<FieldElement, OrderType>* set) {
+        using Polynomial_ = Polynomial<FieldElement, OrderType>;
+        PolynomialSet<FieldElement, OrderType> newSet;
+        for (const auto& polynomial : *set) {
+            newSet.insert(polynomial / Polynomial_::getCoefficient(polynomial.leadingTerm()));
         }
+        *set = std::move(newSet);
     }
 
     template <typename FieldElement, typename OrderType>
-    void DoBuhberger(std::vector<Polynomial<FieldElement, OrderType>>* set) {
+    void DoBuhberger(PolynomialSet<FieldElement, OrderType>* set) {
+        using Polynomial_ = Polynomial<FieldElement, OrderType>;
         LeadingTermToOne(set);
         ReduceSetOverItself(set);
-        while (true) {
-            std::vector<Polynomial<FieldElement, OrderType>> newbies;
-            for (size_t polynomialIndex1 = 0; polynomialIndex1 < set->size(); ++polynomialIndex1) {
-                for (size_t polynomialIndex2 = polynomialIndex1 + 1; polynomialIndex2 < set->size(); ++polynomialIndex2) {
-                    auto& p = (*set)[polynomialIndex1];
-                    auto& q = (*set)[polynomialIndex2];
-                    if (lcm(p.leadingTerm().first, q.leadingTerm().first) != p.leadingTerm().first * q.leadingTerm().first) {
-                        auto S = S_Polynomial((*set)[polynomialIndex1], (*set)[polynomialIndex2]);
-                        ReduceOverSet(*set, &S);
-                        if (S != Polynomial<FieldElement, OrderType>()) {
-                            newbies.emplace_back(std::move(S));
+        PolynomialSet<FieldElement, OrderType> newbies;
+        do {
+            newbies.clear();
+            for (auto it1 = set->begin(); it1 != set->end(); ++it1) {
+                for (auto it2 = it1; it2 != set->end(); ++it2) {
+                    if (it1 != it2) {
+                        auto& p = *it1;
+                        auto& q = *it2;
+                        if (lcm(Polynomial_::getMonomial(p.leadingTerm()), Polynomial_::getMonomial(q.leadingTerm())) !=
+                            Polynomial_::getMonomial(p.leadingTerm()) * Polynomial_::getMonomial(q.leadingTerm())) {
+                            auto S = S_Polynomial(p, q);
+                            ReduceOverSet(*set, &S);
+                            if (S != Polynomial_()) {
+                                newbies.emplace(std::move(S));
+                            }
                         }
                     }
                 }
             }
-            if (newbies.empty()) {
-                break;
-            }
             LeadingTermToOne(&newbies);
             for (auto& polynomial : newbies) {
-                if (std::find(set->begin(), set->end(), polynomial) == set->end()) {
-                    (*set).emplace_back(std::move(polynomial));
-                }
+                set->emplace(std::move(polynomial));
             }
-        }
+        } while (!newbies.empty());
         ReduceSetOverItself(set);
     }
 
     template <typename FieldElement, typename OrderType>
-    bool LaysInIdeal(std::vector<Polynomial<FieldElement, OrderType>> ideal, Polynomial<FieldElement, OrderType> p) {
-        ReduceSetOverItself(&ideal);
+    bool LaysInIdeal(PolynomialSet<FieldElement, OrderType> ideal, Polynomial<FieldElement, OrderType> p) {
+        DoBuhberger(&ideal);
         ReduceOverSet(ideal, &p);
         return p == Polynomial<FieldElement, OrderType>();
     }
 
     template <typename FieldElement, typename OrderType>
-    bool LaysInRadical(std::vector<Polynomial<FieldElement, OrderType>> ideal, Polynomial<FieldElement, OrderType> p) {
+    size_t getMaxVariableNumber(const Polynomial<FieldElement, OrderType>& p) {
         size_t maxVariableNumber = 0;
-        for (auto& polynomial : ideal) {
-            for (auto& term : polynomial) {
-                maxVariableNumber = std::max(maxVariableNumber, term.first.greatestVariableIndex());
-            }
+        for (const auto& term : p) {
+            maxVariableNumber = std::max(maxVariableNumber, Polynomial<FieldElement, OrderType>::getMonomial(term).greatestVariableIndex());
+        }
+        return maxVariableNumber;
+    }
+
+    template <typename FieldElement, typename OrderType>
+    bool LaysInRadical(PolynomialSet<FieldElement, OrderType> ideal, Polynomial<FieldElement, OrderType> p) {
+        size_t maxVariableNumber = 0;
+        for (const auto& polynomial : ideal) {
+            maxVariableNumber = std::max(maxVariableNumber, getMaxVariableNumber(polynomial));
         }
         Monomial::DegreeContainer degrees(maxVariableNumber);
         degrees.push_back(1);
         Polynomial<FieldElement, OrderType> z({{Monomial(degrees), 1}});
         Polynomial<FieldElement, OrderType> one({{Monomial(), 1}});
-        ideal.push_back(p * z - one);
+        ideal.insert(p * z - one);
         return LaysInIdeal(ideal, one);
     }
 }

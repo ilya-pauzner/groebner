@@ -128,22 +128,6 @@ namespace Groebner {
         }
     }
 
-    Monomial random_monomial() {
-        Monomial::DegreeContainer v;
-        for (size_t i = 0; i < 3; ++i) {
-            v.push_back(mt() % 5);
-        }
-        return Monomial(v);
-    }
-
-    Polynomial<boost::rational<long long>, LexOrder> random_polynomial() {
-        Polynomial<boost::rational<long long>, LexOrder> res;
-        for (size_t i = 0; i < 3; ++i) {
-            res += Polynomial<boost::rational<long long>, LexOrder>({{random_monomial(), mt() % 5}});
-        }
-        return res;
-    }
-
     void test_algorithm_lex() {
         Polynomial<boost::rational<long long>, LexOrder> a({{Monomial({1}), 1}});
         Polynomial<boost::rational<long long>, LexOrder> b({{Monomial({0, 1}), 1}});
@@ -152,7 +136,7 @@ namespace Groebner {
         auto f11 = a * a - one;
         auto f12 = (a - one) * b;
         auto f13 = (a + one) * c;
-        std::vector<typeof(f11)> polys1({f11, f12, f13});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys1({f11, f12, f13});
         DoBuhberger(&polys1);
         for (const auto& elem : polys1) {
             std::cout << elem << std::endl;
@@ -162,18 +146,17 @@ namespace Groebner {
         auto f21 = f11;
         auto f22 = f12;
         auto f23 = (a - one) * c;
-        std::vector<typeof(f11)> polys2({f21, f22, f23});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys2({f21, f22, f23});
         DoBuhberger(&polys2);
         for (const auto& elem : polys2) {
             std::cout << elem << std::endl;
         }
         std::cout << std::string(80, '=') << std::endl;
 
-
         auto f31 = a * a * a * b * c - a * c * c;
         auto f32 = a * b * b * c - a * b * c;
         auto f33 = a * a * b * b - c;
-        std::vector<typeof(f11)> polys3({f31, f32, f33});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys3({f31, f32, f33});
         DoBuhberger(&polys3);
         for (const auto& elem : polys3) {
             std::cout << elem << std::endl;
@@ -183,7 +166,7 @@ namespace Groebner {
         auto f41 = a * a * b + a * c + b * b * c;
         auto f42 = a * c * c - b * c;
         auto f43 = a * b * c - b * b;
-        std::vector<typeof(f11)> polys4({f41, f42, f43});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys4({f41, f42, f43});
         DoBuhberger(&polys4);
         for (const auto& elem : polys4) {
             std::cout << elem << std::endl;
@@ -193,7 +176,7 @@ namespace Groebner {
         auto f51 = a * b * b - c - c * c;
         auto f52 = a * a * b - b;
         auto f53 = b * b - c * c;
-        std::vector<typeof(f11)> polys5({f51, f52, f53});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys5({f51, f52, f53});
         DoBuhberger(&polys5);
         for (const auto& elem : polys5) {
             std::cout << elem << std::endl;
@@ -203,7 +186,7 @@ namespace Groebner {
         auto f61 = a * b + a * a * c;
         auto f62 = a * c + b * c * c * c;
         auto f63 = b * c - b * b * c * c * c;
-        std::vector<typeof(f11)> polys6({f61, f62, f63});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys6({f61, f62, f63});
         DoBuhberger(&polys6);
         for (const auto& elem : polys6) {
             std::cout << elem << std::endl;
@@ -213,17 +196,17 @@ namespace Groebner {
         auto f71 = a * a + b * b + c * c - one;
         auto f72 = a * a + c * c - b;
         auto f73 = a - c;
-        std::vector<typeof(f11)> polys7({f71, f72, f73});
+        PolynomialSet<boost::rational<long long>, LexOrder> polys7({f71, f72, f73});
         DoBuhberger(&polys7);
         for (const auto& elem : polys7) {
             std::cout << elem << std::endl;
         }
         std::cout << std::string(80, '=') << std::endl;
 
-        std::cout << LaysInIdeal(polys7, polys7[0]) << std::endl;
+        std::cout << LaysInIdeal(polys7, *polys7.begin()) << std::endl;
         std::cout << std::string(80, '=') << std::endl;
 
-        std::cout << LaysInRadical(polys7, polys7[0]) << std::endl;
+        std::cout << LaysInRadical(polys7, *polys7.begin()) << std::endl;
         std::cout << std::string(80, '=') << std::endl;
     }
 
@@ -234,7 +217,7 @@ namespace Groebner {
         Polynomial<boost::rational<long long>, DegreeLexOrder> one({{Monomial(), 1}});
         auto f11 = a * c - b * b;
         auto f12 = a * a * a - c * c;
-        std::vector<typeof(f11)> polys1({f11, f12});
+        PolynomialSet<boost::rational<long long>, DegreeLexOrder> polys1({f11, f12});
         DoBuhberger(&polys1);
         for (const auto& elem : polys1) {
             std::cout << elem << std::endl;
@@ -252,5 +235,21 @@ namespace Groebner {
         test_monomial_order();
         test_polynomials();
         test_algorithm();
+    }
+
+    Monomial random_monomial() {
+        Monomial::DegreeContainer v;
+        for (size_t i = 0; i < 3; ++i) {
+            v.push_back(mt() % 5);
+        }
+        return Monomial(v);
+    }
+
+    Polynomial<boost::rational<long long>, LexOrder> random_polynomial() {
+        Polynomial<boost::rational<long long>, LexOrder> res;
+        for (size_t i = 0; i < 3; ++i) {
+            res += Polynomial<boost::rational<long long>, LexOrder>({{random_monomial(), mt() % 5}});
+        }
+        return res;
     }
 }

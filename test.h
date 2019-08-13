@@ -14,12 +14,12 @@ namespace Groebner {
     void test_monomial_order();
     void test_polynomials();
     void test_algorithm();
+    void test_algorithm_lex();
+    void test_algorithm_grlex();
+    void test_all();
 
     Monomial random_monomial();
     Polynomial<boost::rational<long long>, LexOrder> random_polynomial();
-
-
-    void test_all();
 }
 
 #endif //GROEBNER_TEST_H
