@@ -105,15 +105,21 @@ namespace Groebner {
     }
 
     template <typename FieldElement, typename OrderType>
+    bool ArePolynomialsCoPrime(const Polynomial<FieldElement, OrderType>& f, const Polynomial<FieldElement, OrderType>& g) {
+        using Poly = Polynomial<FieldElement, OrderType>;
+        auto product = Poly::getMonomial(f.leadingTerm()) * Poly::getMonomial(g.leadingTerm());
+        return product == lcm(Poly::getMonomial(f.leadingTerm()), Poly::getMonomial(g.leadingTerm()));
+    }
+
+    template <typename FieldElement, typename OrderType>
     PolynomialSet<FieldElement, OrderType> GetReducedPairs(const PolynomialSet<FieldElement, OrderType>& set) {
         using Poly = Polynomial<FieldElement, OrderType>;
         PolynomialSet<FieldElement, OrderType> newbies;
         for (auto it1 = set.begin(); it1 != set.end(); ++it1) {
             for (auto it2 = set.begin(); it2 != it1; ++it2) {
-                auto& p = *it1;
-                auto& q = *it2;
-                if (lcm(Poly::getMonomial(p.leadingTerm()), Poly::getMonomial(q.leadingTerm())) !=
-                    Poly::getMonomial(p.leadingTerm()) * Poly::getMonomial(q.leadingTerm())) {
+                const auto& p = *it1;
+                const auto& q = *it2;
+                if (!ArePolynomialsCoPrime(p, q)) {
                     auto S = S_Polynomial(p, q);
                     ReduceOverSetWhilePossible(set, &S);
                     if (S != FieldElement(0)) {
@@ -156,11 +162,15 @@ namespace Groebner {
     }
 
     template <typename FieldElement, typename OrderType>
-    Polynomial<FieldElement, OrderType> MakeNewVariable(const PolynomialSet<FieldElement, OrderType>& ideal) {
+    Polynomial<FieldElement, OrderType> MakeNewVariable(
+        const PolynomialSet<FieldElement, OrderType>& ideal,
+        const Polynomial<FieldElement, OrderType>& p = FieldElement(0))
+    {
         size_t maxVariableNumber = 0;
         for (const auto& polynomial : ideal) {
             maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(polynomial));
         }
+        maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(p));
         Monomial::DegreeContainer degrees(maxVariableNumber);
         degrees.push_back(1);
         return Polynomial<FieldElement, OrderType>({{Monomial(degrees), 1}});
@@ -169,7 +179,7 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     bool LaysInRadical(PolynomialSet<FieldElement, OrderType> ideal, Polynomial<FieldElement, OrderType> p) {
         Polynomial<FieldElement, OrderType> one({{Monomial(), 1}});
-        auto z = MakeNewVariable(ideal);
+        auto z = MakeNewVariable(ideal, p);
         ideal.insert(p * z - one);
         return LaysInIdeal(ideal, one);
     }
