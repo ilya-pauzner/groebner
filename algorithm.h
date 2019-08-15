@@ -111,20 +111,30 @@ namespace Groebner {
     }
 
     template <typename FieldElement, typename OrderType>
+    bool ProcessPair(const Polynomial<FieldElement, OrderType>& f,
+                     const Polynomial<FieldElement, OrderType>& g,
+                     const PolynomialSet<FieldElement, OrderType>& set,
+                     PolynomialSet<FieldElement, OrderType>* newbies)
+    {
+        if (AreLeadingTermsCoPrime(f, g)) {
+            return false;
+        }
+        auto S = S_Polynomial(f, g);
+        ReduceOverSetWhilePossible(set, &S);
+        if (S == FieldElement(0)) {
+            return false;
+        }
+        newbies->emplace(std::move(S));
+        return true;
+    }
+
+    template <typename FieldElement, typename OrderType>
     PolynomialSet<FieldElement, OrderType> GetReducedPairs(const PolynomialSet<FieldElement, OrderType>& set) {
         using Poly = Polynomial<FieldElement, OrderType>;
         PolynomialSet<FieldElement, OrderType> newbies;
         for (auto it1 = set.begin(); it1 != set.end(); ++it1) {
             for (auto it2 = set.begin(); it2 != it1; ++it2) {
-                const auto& p = *it1;
-                const auto& q = *it2;
-                if (!AreLeadingTermsCoPrime(p, q)) {
-                    auto S = S_Polynomial(p, q);
-                    ReduceOverSetWhilePossible(set, &S);
-                    if (S != FieldElement(0)) {
-                        newbies.emplace(std::move(S));
-                    }
-                }
+                ProcessPair(*it1, *it2, set, &newbies);
             }
         }
         LeadingTermToOne(&newbies);
