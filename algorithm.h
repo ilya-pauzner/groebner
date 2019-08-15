@@ -105,27 +105,26 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     bool AreLeadingTermsCoPrime(const Polynomial<FieldElement, OrderType>& f, const Polynomial<FieldElement, OrderType>& g) {
         using Poly = Polynomial<FieldElement, OrderType>;
-        auto fTerm = Poly::getMonomial(f.leadingTerm());
-        auto gTerm = Poly::getMonomial(g.leadingTerm());
+        const auto& fTerm = Poly::getMonomial(f.leadingTerm());
+        const auto& gTerm = Poly::getMonomial(g.leadingTerm());
         return fTerm * gTerm == lcm(fTerm, gTerm);
     }
 
     template <typename FieldElement, typename OrderType>
-    bool ProcessPair(const Polynomial<FieldElement, OrderType>& f,
+    void ProcessPair(const Polynomial<FieldElement, OrderType>& f,
                      const Polynomial<FieldElement, OrderType>& g,
                      const PolynomialSet<FieldElement, OrderType>& set,
                      PolynomialSet<FieldElement, OrderType>* newbies)
     {
         if (AreLeadingTermsCoPrime(f, g)) {
-            return false;
+            return;
         }
         auto S = S_Polynomial(f, g);
         ReduceOverSetWhilePossible(set, &S);
         if (S == FieldElement(0)) {
-            return false;
+            return;
         }
-        newbies->emplace(std::move(S));
-        return true;
+        newbies->insert(std::move(S));
     }
 
     template <typename FieldElement, typename OrderType>
