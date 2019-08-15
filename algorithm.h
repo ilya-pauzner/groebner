@@ -105,8 +105,9 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     bool AreLeadingTermsCoPrime(const Polynomial<FieldElement, OrderType>& f, const Polynomial<FieldElement, OrderType>& g) {
         using Poly = Polynomial<FieldElement, OrderType>;
-        auto product = Poly::getMonomial(f.leadingTerm()) * Poly::getMonomial(g.leadingTerm());
-        return product == lcm(Poly::getMonomial(f.leadingTerm()), Poly::getMonomial(g.leadingTerm()));
+        auto fTerm = Poly::getMonomial(f.leadingTerm());
+        auto gTerm = Poly::getMonomial(g.leadingTerm());
+        return fTerm * gTerm == lcm(fTerm, gTerm);
     }
 
     template <typename FieldElement, typename OrderType>
