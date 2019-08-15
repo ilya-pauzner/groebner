@@ -71,12 +71,10 @@ namespace Groebner {
         auto it = set->begin();
         size_t reductionsMade = 0;
         while (it != set->end()) {
-            auto it2 = (it++);
-            Poly p = *it2;
-            set->erase(p);
+            Poly p = std::move(set->extract(it++).value());
             reductionsMade += ReduceOverSetWhilePossible(*set, &p);
             if (p != FieldElement(0)) {
-                set->insert(p);
+                set->insert(std::move(p));
             }
         }
         return reductionsMade > 0;
@@ -105,7 +103,7 @@ namespace Groebner {
     }
 
     template <typename FieldElement, typename OrderType>
-    bool ArePolynomialsCoPrime(const Polynomial<FieldElement, OrderType>& f, const Polynomial<FieldElement, OrderType>& g) {
+    bool AreLeadingTermsCoPrime(const Polynomial<FieldElement, OrderType>& f, const Polynomial<FieldElement, OrderType>& g) {
         using Poly = Polynomial<FieldElement, OrderType>;
         auto product = Poly::getMonomial(f.leadingTerm()) * Poly::getMonomial(g.leadingTerm());
         return product == lcm(Poly::getMonomial(f.leadingTerm()), Poly::getMonomial(g.leadingTerm()));
@@ -119,7 +117,7 @@ namespace Groebner {
             for (auto it2 = set.begin(); it2 != it1; ++it2) {
                 const auto& p = *it1;
                 const auto& q = *it2;
-                if (!ArePolynomialsCoPrime(p, q)) {
+                if (!AreLeadingTermsCoPrime(p, q)) {
                     auto S = S_Polynomial(p, q);
                     ReduceOverSetWhilePossible(set, &S);
                     if (S != FieldElement(0)) {
@@ -135,11 +133,11 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     void DoBuhberger(PolynomialSet<FieldElement, OrderType>* set) {
         using Poly = Polynomial<FieldElement, OrderType>;
-        LeadingTermToOne(set);
         ReduceSetOverItselfWhilePossible(set);
+        LeadingTermToOne(set);
         PolynomialSet<FieldElement, OrderType> newbies = GetReducedPairs(*set);
         while (!newbies.empty()) {
-            std::copy(std::make_move_iterator(newbies.begin()), std::make_move_iterator(newbies.end()), std::inserter(*set, set->begin()));
+            std::move(newbies.begin(), newbies.end(), std::inserter(*set, set->begin()));
             newbies = GetReducedPairs(*set);
         }
         ReduceSetOverItselfWhilePossible(set);
