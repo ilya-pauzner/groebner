@@ -164,7 +164,11 @@ namespace Groebner {
                 if (termIterator != p.data.begin()) {
                     os << " + ";
                 }
-                os << termIterator->second << termIterator->first;
+
+                if (termIterator->second != FieldElement(1) || termIterator->first == Monomial()    ) {
+                    os << termIterator->second;
+                }
+                os << termIterator->first;
             }
             return os;
         }
