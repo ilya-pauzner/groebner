@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <map>
 #include <vector>
+#include <unordered_set>
+#include <boost/rational.hpp>
 
 namespace Groebner {
     template <typename OrderType>
@@ -17,8 +19,8 @@ namespace Groebner {
     template <typename FieldElement, typename OrderType>
     class Polynomial {
         using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<OrderType>>;
-        using Term = typename TermMap::value_type;
      public:
+        using Term = typename TermMap::value_type;
 
         Polynomial() = default;
         Polynomial(std::initializer_list<Term> source) {
@@ -38,7 +40,7 @@ namespace Groebner {
             return data.begin();
         };
 
-        typename TermMap::const_iterator cbegin() const {
+        typename TermMap::const_iterator begin() const {
             return data.cbegin();
         };
 
@@ -46,7 +48,7 @@ namespace Groebner {
             return data.end();
         };
 
-        typename TermMap::const_iterator cend() const {
+        typename TermMap::const_iterator end() const {
             return data.cend();
         };
 
@@ -54,7 +56,7 @@ namespace Groebner {
             return data.rbegin();
         };
 
-        typename TermMap::const_reverse_iterator crbegin() const {
+        typename TermMap::const_reverse_iterator rbegin() const {
             return data.crbegin();
         };
 
@@ -62,9 +64,14 @@ namespace Groebner {
             return data.rend();
         };
 
-        typename TermMap::const_reverse_iterator crend() const {
+        typename TermMap::const_reverse_iterator rend() const {
             return data.crend();
         };
+
+        const Term& leadingTerm() const {
+            assert(!data.empty());
+            return *rbegin();
+        }
 
         Polynomial& operator+=(const Polynomial& other) {
             for (const Term& term : other.data) {
@@ -111,6 +118,39 @@ namespace Groebner {
             return res;
         }
 
+        Polynomial& operator/=(const FieldElement& f) {
+            for (const Term& term : data) {
+                data[term.first] /= f;
+            }
+            return *this;
+        }
+
+        friend Polynomial operator/(const Polynomial& lhs, const FieldElement& f) {
+            Polynomial ret(lhs);
+            ret /= f;
+            return ret;
+        }
+
+        static const Monomial& getMonomial(const Term& pair) {
+            return pair.first;
+        }
+
+        static const FieldElement& getCoefficient(const Term& pair) {
+            return pair.second;
+        }
+
+        static FieldElement& getCoefficient(Term& pair) {
+            return pair.second;
+        }
+
+        friend std::size_t hash_value(const Polynomial& p) {
+            std::size_t seed = 0;
+            for (const Term& term : p) {
+                boost::hash_combine(seed, term);
+            }
+            return seed;
+        }
+
         friend bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
             return lhs.data == rhs.data;
         }
@@ -126,26 +166,28 @@ namespace Groebner {
                 }
                 os << termIterator->second << termIterator->first;
             }
+            return os;
         }
      private:
         TermMap data;
-
-        static const Monomial& getMonomial(const Term& pair) {
-            return pair.first;
-        }
-
-        static const FieldElement& getCoefficient(const Term& pair) {
-            return pair.second;
-        }
-
-        static FieldElement& getCoefficient(Term& pair) {
-            return pair.second;
-        }
 
         void trimZeroes() {
             for (auto iter = data.cbegin(); iter != data.cend(); (getCoefficient(*iter) == 0 ? data.erase(iter++) : ++iter));
         }
     };
 
+    template <typename FieldElement, typename OrderType>
+    using PolynomialSet = std::unordered_set<Polynomial<FieldElement, OrderType>, boost::hash<Polynomial<FieldElement, OrderType>>>;
+}
+
+namespace boost {
+    template <typename IntType>
+    size_t hash_value(const boost::rational<IntType>& coeff)
+    {
+        size_t seed = 0;
+        boost::hash_combine(seed, coeff.numerator());
+        boost::hash_combine(seed, coeff.denominator());
+        return seed;
+    }
 }
 #endif //GROEBNER_POLYNOMIAL_H

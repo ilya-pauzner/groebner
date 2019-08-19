@@ -1,9 +1,9 @@
 #include "monomial.h"
 
 namespace Groebner {
-    Monomial::Monomial(const DegreeContainer& container) : Degrees_(container) {}
-
-    Monomial::Monomial(DegreeContainer&& container) : Degrees_(std::move(container)) {}
+    Monomial::Monomial(DegreeContainer container) : Degrees_(std::move(container)) {
+        trimTrailingZeroes();
+    }
 
     Monomial::Monomial(std::initializer_list<Monomial::DegreeType> ilist) : Degrees_(ilist) {
         trimTrailingZeroes();
@@ -90,6 +90,10 @@ namespace Groebner {
             ++newSize;
         }
         Degrees_.resize(newSize);
+    }
+
+    std::size_t hash_value(const Monomial& m) {
+        return boost::hash_value(m.Degrees_);
     }
 
     std::ostream& operator<<(std::ostream& os, const Monomial& m) {
