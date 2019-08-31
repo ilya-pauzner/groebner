@@ -165,7 +165,7 @@ namespace Groebner {
                     os << " + ";
                 }
 
-                if (termIterator->second != FieldElement(1) || termIterator->first == Monomial()    ) {
+                if (getCoefficient(*termIterator) != FieldElement(1) || getMonomial(*termIterator) == Monomial()) {
                     os << termIterator->second;
                 }
                 os << termIterator->first;
