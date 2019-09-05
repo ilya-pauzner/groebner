@@ -64,6 +64,9 @@ int main() {
             os << "Groebner Lex for " << i << " calculation\n";
             Groebner::Timer t(os.str());
 
+            auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
+            auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
             Groebner::DoBuhberger(&familyLex);
         }
         auto familyRevLex = GenerateCyclicFamily<Groebner::DegreeRevLexOrder>(i);
@@ -72,6 +75,9 @@ int main() {
             os << "Groebner DegRevLex for " << i << " calculation\n";
             Groebner::Timer t(os.str());
 
+            auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
+            auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
             Groebner::DoBuhberger(&familyRevLex);
         }
 
@@ -89,6 +95,9 @@ int main() {
                 familyLex2.insert(p2);
             }
 
+            auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
+            auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
             Groebner::DoBuhberger(&familyLex2);
             if (familyLex != familyLex2) {
                 throw std::runtime_error("Sets should be equal.");

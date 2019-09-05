@@ -18,7 +18,7 @@ namespace Groebner {
     };
 
     template <typename FieldElement, typename OrderType>
-    class Polynomial : public NSLibrary::CCTorCheck<Monomial, NSLibrary::CCopyMode> {
+    class Polynomial : public NSLibrary::CCTorCheck<Monomial, NSLibrary::CSilentMode> {
         using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<OrderType>>;
      public:
         using Term = typename TermMap::value_type;
