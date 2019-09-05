@@ -179,9 +179,7 @@ namespace Groebner {
             maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(polynomial));
         }
         maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(p));
-        Monomial::DegreeContainer degrees(maxVariableNumber);
-        degrees.push_back(1);
-        return Polynomial<FieldElement, OrderType>({{Monomial(degrees), 1}});
+        return Polynomial<FieldElement, OrderType>(Monomial::getNthVariable(maxVariableNumber));
     }
 
     template <typename FieldElement, typename OrderType>

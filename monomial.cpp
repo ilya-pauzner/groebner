@@ -106,4 +106,10 @@ namespace Groebner {
         }
         return os;
     }
+
+    Monomial Monomial::getNthVariable(size_t variableIndex, size_t variableDegree) {
+        Groebner::Monomial::DegreeContainer degrees(variableIndex, 0);
+        degrees.push_back(variableDegree);
+        return Monomial(degrees);
+    }
 }
