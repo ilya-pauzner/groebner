@@ -66,7 +66,10 @@ int main() {
 
             auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
             auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto copyAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
             auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
+            auto moveAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
+            auto dtorsAnchor = RationalPolynomial<Groebner::LexOrder>::countDestructors();
             Groebner::DoBuhberger(&familyLex);
         }
         auto familyRevLex = GenerateCyclicFamily<Groebner::DegreeRevLexOrder>(i);
@@ -77,7 +80,10 @@ int main() {
 
             auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
             auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto copyAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
             auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
+            auto moveAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
+            auto dtorsAnchor = RationalPolynomial<Groebner::LexOrder>::countDestructors();
             Groebner::DoBuhberger(&familyRevLex);
         }
 
@@ -97,7 +103,10 @@ int main() {
 
             auto defAnchor = RationalPolynomial<Groebner::LexOrder>::countDefaultCTors();
             auto copyAnchor = RationalPolynomial<Groebner::LexOrder>::countCopyCTors();
+            auto copyAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
             auto moveAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveCTors();
+            auto moveAssignAnchor = RationalPolynomial<Groebner::LexOrder>::countMoveAsgnmts();
+            auto dtorsAnchor = RationalPolynomial<Groebner::LexOrder>::countDestructors();
             Groebner::DoBuhberger(&familyLex2);
             if (familyLex != familyLex2) {
                 throw std::runtime_error("Sets should be equal.");
