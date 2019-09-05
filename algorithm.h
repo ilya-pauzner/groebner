@@ -70,13 +70,16 @@ namespace Groebner {
         using Poly = Polynomial<FieldElement, OrderType>;
         auto it = set->begin();
         size_t reductionsMade = 0;
+        PolynomialSet<FieldElement, OrderType> reducedSet;
         while (it != set->end()) {
             Poly p = std::move(set->extract(it++).value());
+            reductionsMade += ReduceOverSetWhilePossible(reducedSet, &p);
             reductionsMade += ReduceOverSetWhilePossible(*set, &p);
             if (p != FieldElement(0)) {
-                set->insert(std::move(p));
+                reducedSet.insert(std::move(p));
             }
         }
+        *set = std::move(reducedSet);
         return reductionsMade > 0;
     }
 
