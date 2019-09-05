@@ -58,14 +58,43 @@ int main() {
     Groebner::test_all();
     std::cout << std::string(80, '=') << std::endl;
     for (size_t i = 1; i <= 10; ++i) {
-        auto family = GenerateCyclicFamily<Groebner::LexOrder>(i);
-        std::ostringstream os;
-        os << "Groebner for " << i << " calculation";
+        auto familyLex = GenerateCyclicFamily<Groebner::LexOrder>(i);
         {
+            std::ostringstream os;
+            os << "Groebner Lex for " << i << " calculation\n";
             Groebner::Timer t(os.str());
-            Groebner::DoBuhberger(&family);
+
+            Groebner::DoBuhberger(&familyLex);
         }
-        for (const auto& elem : family) {
+        auto familyRevLex = GenerateCyclicFamily<Groebner::DegreeRevLexOrder>(i);
+        {
+            std::ostringstream os;
+            os << "Groebner DegRevLex for " << i << " calculation\n";
+            Groebner::Timer t(os.str());
+
+            Groebner::DoBuhberger(&familyRevLex);
+        }
+
+        {
+            std::ostringstream os;
+            os << "Groebner from DegRevLex to Lex for " << i << " calculation\n";
+            Groebner::Timer t(os.str());
+
+            RationalPolynomialSet<Groebner::LexOrder> familyLex2;
+            for (const auto& p : familyRevLex) {
+                RationalPolynomial<Groebner::LexOrder> p2;
+                for (const auto& term : p) {
+                    p2 += RationalPolynomial<Groebner::LexOrder>({term});
+                }
+                familyLex2.insert(p2);
+            }
+
+            Groebner::DoBuhberger(&familyLex2);
+            if (familyLex != familyLex2) {
+                throw std::runtime_error("Sets should be equal.");
+            }
+        }
+        for (const auto& elem : familyLex) {
             std::cout << elem << std::endl;
         }
         std::cout << std::endl;

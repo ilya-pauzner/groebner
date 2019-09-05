@@ -10,6 +10,11 @@ namespace Groebner {
         static bool isLess(const Monomial& lhs, const Monomial& rhs);
     };
 
+    class RevLexOrder {
+     public:
+        static bool isLess(const Monomial& lhs, const Monomial& rhs);
+    };
+
     class DegreeOrder {
      public:
         static bool isLess(const Monomial& lhs, const Monomial& rhs);
@@ -28,6 +33,7 @@ namespace Groebner {
     };
 
     using DegreeLexOrder = Sum<DegreeOrder, LexOrder>;
+    using DegreeRevLexOrder = Sum<DegreeOrder, RevLexOrder>;
 
 }
 
