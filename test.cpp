@@ -230,11 +230,76 @@ namespace Groebner {
         test_algorithm_grlex();
     }
 
+    void test_algorithm_cyclic() {
+        std::cout << std::string(80, '=') << std::endl;
+        for (size_t i = 1; i <= 10; ++i) {
+            auto familyLex = GenerateCyclicFamily<Groebner::LexOrder>(i);
+            {
+                std::ostringstream os;
+                os << "Groebner Lex for " << i << " calculation\n";
+                Groebner::Timer t(os.str());
+
+                auto defAnchor = RationalPolynomialLex::countDefaultCTors();
+                auto copyAnchor = RationalPolynomialLex::countCopyCTors();
+                auto copyAssignAnchor = RationalPolynomialLex::countMoveAsgnmts();
+                auto moveAnchor = RationalPolynomialLex::countMoveCTors();
+                auto moveAssignAnchor = RationalPolynomialLex::countMoveAsgnmts();
+                auto dtorsAnchor = RationalPolynomialLex::countDestructors();
+                Groebner::DoBuhberger(&familyLex);
+            }
+            auto familyRevLex = GenerateCyclicFamily<Groebner::DegreeRevLexOrder>(i);
+            {
+                std::ostringstream os;
+                os << "Groebner DegRevLex for " << i << " calculation\n";
+                Groebner::Timer t(os.str());
+
+                auto defAnchor = RationalPolynomialDegRevLex::countDefaultCTors();
+                auto copyAnchor = RationalPolynomialDegRevLex::countCopyCTors();
+                auto copyAssignAnchor = RationalPolynomialDegRevLex::countMoveAsgnmts();
+                auto moveAnchor = RationalPolynomialDegRevLex::countMoveCTors();
+                auto moveAssignAnchor = RationalPolynomialDegRevLex::countMoveAsgnmts();
+                auto dtorsAnchor = RationalPolynomialDegRevLex::countDestructors();
+                Groebner::DoBuhberger(&familyRevLex);
+            }
+
+            {
+                std::ostringstream os;
+                os << "Groebner from DegRevLex to Lex for " << i << " calculation\n";
+                Groebner::Timer t(os.str());
+
+                RationalPolynomialSet<Groebner::LexOrder> familyLex2;
+                for (const auto& p : familyRevLex) {
+                    RationalPolynomialLex p2;
+                    for (const auto& term : p) {
+                        p2 += RationalPolynomialLex({term});
+                    }
+                    familyLex2.insert(p2);
+                }
+
+                auto defAnchor = RationalPolynomialLex::countDefaultCTors();
+                auto copyAnchor = RationalPolynomialLex::countCopyCTors();
+                auto copyAssignAnchor = RationalPolynomialLex::countMoveAsgnmts();
+                auto moveAnchor = RationalPolynomialLex::countMoveCTors();
+                auto moveAssignAnchor = RationalPolynomialLex::countMoveAsgnmts();
+                auto dtorsAnchor = RationalPolynomialLex::countDestructors();
+                Groebner::DoBuhberger(&familyLex2);
+                if (familyLex != familyLex2) {
+                    throw std::runtime_error("Sets should be equal.");
+                }
+            }
+            for (const auto& elem : familyLex) {
+                std::cout << elem << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+
     void test_all() {
         test_monomials();
         test_monomial_order();
         test_polynomials();
         test_algorithm();
+        test_algorithm_cyclic();
     }
 
     Monomial random_monomial() {
