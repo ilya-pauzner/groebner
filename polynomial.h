@@ -1,7 +1,7 @@
 #ifndef GROEBNER_POLYNOMIAL_H
 #define GROEBNER_POLYNOMIAL_H
 #include "monomial_order.h"
-#include "CTorCheck.h"
+#include "CTorCheck/CTorCheck.h"
 #include <algorithm>
 #include <map>
 #include <vector>
