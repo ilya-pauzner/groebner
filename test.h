@@ -6,6 +6,7 @@
 #include "monomial.h"
 #include "monomial_order.h"
 #include "polynomial.h"
+#include "cyclic.h"
 #include "boost/rational.hpp"
 #include <random>
 
@@ -16,6 +17,7 @@ namespace Groebner {
     void test_algorithm();
     void test_algorithm_lex();
     void test_algorithm_grlex();
+    void test_algorithm_cyclic();
     void test_all();
 
     Monomial random_monomial();

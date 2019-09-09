@@ -70,13 +70,16 @@ namespace Groebner {
         using Poly = Polynomial<FieldElement, OrderType>;
         auto it = set->begin();
         size_t reductionsMade = 0;
+        PolynomialSet<FieldElement, OrderType> reducedSet;
         while (it != set->end()) {
             Poly p = std::move(set->extract(it++).value());
             reductionsMade += ReduceOverSetWhilePossible(*set, &p);
+            reductionsMade += ReduceOverSetWhilePossible(reducedSet, &p);
             if (p != FieldElement(0)) {
-                set->insert(std::move(p));
+                reducedSet.insert(std::move(p));
             }
         }
+        *set = std::move(reducedSet);
         return reductionsMade > 0;
     }
 
@@ -179,9 +182,7 @@ namespace Groebner {
             maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(polynomial));
         }
         maxVariableNumber = std::max(maxVariableNumber, GetMaxVariableNumber(p));
-        Monomial::DegreeContainer degrees(maxVariableNumber);
-        degrees.push_back(1);
-        return Polynomial<FieldElement, OrderType>({{Monomial(degrees), 1}});
+        return Polynomial<FieldElement, OrderType>(Monomial::getNthVariable(maxVariableNumber));
     }
 
     template <typename FieldElement, typename OrderType>

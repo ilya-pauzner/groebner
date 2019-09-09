@@ -9,4 +9,9 @@ namespace Groebner {
         }
         return Monomial(result);
     }
+
+    Timer::Timer(std::string _message_ = "") : message(std::move(_message_)), t0(clock()) {}
+    Timer::~Timer() {
+        std::cout << double(clock() - t0) / CLOCKS_PER_SEC << " elapsed for " << message << std::endl;
+    }
 }

@@ -1,6 +1,7 @@
 #ifndef GROEBNER_POLYNOMIAL_H
 #define GROEBNER_POLYNOMIAL_H
 #include "monomial_order.h"
+#include "CTorCheck/CTorCheck.h"
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -17,7 +18,7 @@ namespace Groebner {
     };
 
     template <typename FieldElement, typename OrderType>
-    class Polynomial {
+    class Polynomial : public NSLibrary::CCTorCheck<Monomial, NSLibrary::CSilentMode> {
         using TermMap = std::map<Monomial, FieldElement, OrderAdaptor<OrderType>>;
      public:
         using Term = typename TermMap::value_type;
@@ -164,7 +165,11 @@ namespace Groebner {
                 if (termIterator != p.data.begin()) {
                     os << " + ";
                 }
-                os << termIterator->second << termIterator->first;
+
+                if (getCoefficient(*termIterator) != FieldElement(1) || getMonomial(*termIterator) == Monomial()) {
+                    os << termIterator->second;
+                }
+                os << termIterator->first;
             }
             return os;
         }

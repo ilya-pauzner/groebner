@@ -35,6 +35,8 @@ namespace Groebner {
         friend bool operator!=(const Monomial&, const Monomial&);
 
         friend std::ostream& operator<<(std::ostream& os, const Monomial& m);
+
+        static Monomial getNthVariable(size_t variableIndex, size_t variableDegree = 1);
      private:
         DegreeContainer Degrees_;
         void trimTrailingZeroes();

@@ -1,0 +1,3 @@
+[submodule "CTorCheck"]
+	path = CTorCheck
+	url = https://github.com/DimaTrushin/CTorCheck.git
